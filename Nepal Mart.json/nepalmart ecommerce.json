@@ -1,0 +1,328 @@
+{
+  "version": "2.5.0",
+  "summary": {
+    "title": "NepalMart E-Commerce Threat Model",
+    "owner": "Abishek",
+    "description": "STRIDE-based threat model for NepalMart online shopping platform handling customer data, payments, and inventory.",
+    "id": 0
+  },
+  "detail": {
+    "contributors": ["Abishek"],
+    "diagrams": [
+      {
+        "id": 0,
+        "title": "NepalMart E-Commerce Architecture (STRIDE)",
+        "diagramType": "STRIDE",
+        "placeholder": "E-commerce system with users, web/app frontend, servers, databases, and external services",
+        "thumbnail": "./public/content/images/thumbnail.stride.jpg",
+        "version": "2.5.0",
+        "cells": [
+          {
+            "position": { "x": -5200, "y": -2400 },
+            "size": { "width": 200, "height": 80 },
+            "attrs": { "text": { "text": "Customer\n(Browser / Mobile App)" } },
+            "shape": "actor",
+            "id": "customer-actor",
+            "data": {
+              "type": "tm.Actor",
+              "name": "Customer (Browser / Mobile App)",
+              "description": "End users accessing the platform via web browser or mobile application.",
+              "outOfScope": false,
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "title": "Phishing / Spoofed login page",
+                  "status": "Open",
+                  "severity": "High",
+                  "type": "Spoofing",
+                  "description": "Attacker spoofs login page to steal credentials",
+                  "mitigation": "MFA, HTTPS with HSTS, security indicators",
+                  "modelType": "STRIDE",
+                  "number": 1
+                }
+              ]
+            }
+          },
+          {
+            "position": { "x": -4800, "y": -2600 },
+            "size": { "width": 160, "height": 100 },
+            "attrs": { "text": { "text": "Web Server\n(Apache/Nginx)" }, "body": { "stroke": "red" } },
+            "shape": "process",
+            "id": "web-server",
+            "data": {
+              "type": "tm.Process",
+              "name": "Web Server (Apache/Nginx)",
+              "description": "Serves static content and forwards requests to application layer.",
+              "outOfScope": false,
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "title": "DoS via traffic flood",
+                  "status": "Open",
+                  "severity": "Medium",
+                  "type": "Denial of Service",
+                  "description": "Large volume of requests exhaust resources",
+                  "mitigation": "Rate limiting, WAF, CDN",
+                  "modelType": "STRIDE",
+                  "number": 2
+                },
+                {
+                  "title": "Content tampering (MITM)",
+                  "status": "Open",
+                  "severity": "High",
+                  "type": "Tampering",
+                  "description": "Modify served pages if TLS broken",
+                  "mitigation": "HSTS, certificate pinning",
+                  "modelType": "STRIDE",
+                  "number": 3
+                }
+              ]
+            }
+          },
+          {
+            "position": { "x": -4800, "y": -2200 },
+            "size": { "width": 160, "height": 100 },
+            "attrs": { "text": { "text": "Application Server" }, "body": { "stroke": "red" } },
+            "shape": "process",
+            "id": "app-server",
+            "data": {
+              "type": "tm.Process",
+              "name": "Application Server",
+              "description": "Core business logic: cart, orders, authentication, payment orchestration.",
+              "outOfScope": false,
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "title": "Session hijacking / Elevation",
+                  "status": "Open",
+                  "severity": "High",
+                  "type": "Elevation of Privilege",
+                  "description": "Steal or reuse sessions to gain higher access",
+                  "mitigation": "Secure cookies, JWT with short expiry, IP binding",
+                  "modelType": "STRIDE",
+                  "number": 4
+                },
+                {
+                  "title": "Repudiation of transactions",
+                  "status": "Open",
+                  "severity": "Medium",
+                  "type": "Repudiation",
+                  "description": "User denies placing order",
+                  "mitigation": "Non-repudiable logs, digital signatures",
+                  "modelType": "STRIDE",
+                  "number": 5
+                }
+              ]
+            }
+          },
+          {
+            "position": { "x": -4400, "y": -2400 },
+            "size": { "width": 140, "height": 80 },
+            "attrs": { "text": { "text": "Redis Cache" } },
+            "shape": "process",
+            "id": "cache-server",
+            "data": {
+              "type": "tm.Process",
+              "name": "Redis Cache",
+              "description": "Temporary storage for sessions and frequent data.",
+              "outOfScope": false,
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "title": "Cache poisoning",
+                  "status": "Open",
+                  "severity": "Medium",
+                  "type": "Tampering",
+                  "description": "Inject malicious data into cache",
+                  "mitigation": "Input validation, cache key signing",
+                  "modelType": "STRIDE",
+                  "number": 6
+                }
+              ]
+            }
+          },
+          {
+            "position": { "x": -4400, "y": -2700 },
+            "size": { "width": 140, "height": 80 },
+            "attrs": { "text": { "text": "User DB (Encrypted)" }, "topLine": { "stroke": "red" } },
+            "shape": "store",
+            "id": "user-db",
+            "data": {
+              "type": "tm.Store",
+              "name": "User Database (Encrypted)",
+              "description": "Stores PII, hashed passwords, encrypted sensitive fields.",
+              "outOfScope": false,
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "title": "SQL injection → Info disclosure",
+                  "status": "Open",
+                  "severity": "Critical",
+                  "type": "Information Disclosure",
+                  "description": "Extract PII via injection",
+                  "mitigation": "Parameterized queries, WAF, input sanitization",
+                  "modelType": "STRIDE",
+                  "number": 7
+                }
+              ]
+            }
+          },
+          {
+            "position": { "x": -4400, "y": -2100 },
+            "size": { "width": 140, "height": 80 },
+            "attrs": { "text": { "text": "Product DB" } },
+            "shape": "store",
+            "id": "product-db",
+            "data": {
+              "type": "tm.Store",
+              "name": "Product Database",
+              "description": "Inventory, prices, descriptions.",
+              "outOfScope": false,
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "position": { "x": -4000, "y": -2400 },
+            "size": { "width": 180, "height": 60 },
+            "attrs": { "text": { "text": "Payment Gateway" }, "body": { "stroke": "red" } },
+            "shape": "actor",
+            "id": "payment-gw",
+            "data": {
+              "type": "tm.Actor",
+              "name": "Payment Gateway",
+              "description": "External service (e.g. Stripe/Khalti) – tokenized payments.",
+              "outOfScope": false,
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "title": "Transaction tampering",
+                  "status": "Open",
+                  "severity": "High",
+                  "type": "Tampering",
+                  "description": "Alter amount or redirect payment",
+                  "mitigation": "Digital signatures, webhook verification",
+                  "modelType": "STRIDE",
+                  "number": 8
+                }
+              ]
+            }
+          },
+          {
+            "position": { "x": -5200, "y": -2800 },
+            "size": { "width": 140, "height": 60 },
+            "attrs": { "text": { "text": "Admin" } },
+            "shape": "actor",
+            "id": "admin-actor",
+            "data": {
+              "type": "tm.Actor",
+              "name": "Admin",
+              "description": "Internal staff managing platform.",
+              "outOfScope": false,
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "title": "Privilege escalation",
+                  "status": "Open",
+                  "severity": "High",
+                  "type": "Elevation of Privilege",
+                  "description": "Compromised admin session gains full control",
+                  "mitigation": "MFA, RBAC, session timeouts",
+                  "modelType": "STRIDE",
+                  "number": 9
+                }
+              ]
+            }
+          },
+          {
+            "position": { "x": -4000, "y": -2700 },
+            "size": { "width": 180, "height": 60 },
+            "attrs": { "text": { "text": "Shipping API" } },
+            "shape": "actor",
+            "id": "shipping-api",
+            "data": { "type": "tm.Actor", "name": "Shipping API", "description": "External logistics provider.", "outOfScope": false }
+          },
+          {
+            "position": { "x": -4000, "y": -2100 },
+            "size": { "width": 180, "height": 60 },
+            "attrs": { "text": { "text": "Email Service" } },
+            "shape": "actor",
+            "id": "email-service",
+            "data": { "type": "tm.Actor", "name": "Email Service", "description": "Transactional emails (e.g. SendGrid).", "outOfScope": false }
+          },
+          {
+            "shape": "flow",
+            "source": { "cell": "customer-actor" },
+            "target": { "cell": "web-server" },
+            "labels": ["HTTPS: Browse, login, cart"],
+            "attrs": { "line": { "stroke": "red" } },
+            "data": {
+              "type": "tm.Flow",
+              "name": "HTTPS: Browse, login, cart",
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "title": "Credential theft (phishing/spoofing)",
+                  "status": "Open",
+                  "severity": "High",
+                  "type": "Spoofing",
+                  "description": "Fake site steals login credentials",
+                  "mitigation": "MFA, anti-phishing training, secure browser indicators",
+                  "modelType": "STRIDE",
+                  "number": 10
+                }
+              ]
+            }
+          },
+          {
+            "shape": "flow",
+            "source": { "cell": "web-server" },
+            "target": { "cell": "app-server" },
+            "labels": ["Internal API calls"],
+            "data": { "type": "tm.Flow", "name": "Internal API calls" }
+          },
+          {
+            "shape": "flow",
+            "source": { "cell": "app-server" },
+            "target": { "cell": "user-db" },
+            "labels": ["SQL over TLS"],
+            "data": { "type": "tm.Flow", "name": "SQL over TLS" }
+          },
+          {
+            "shape": "flow",
+            "source": { "cell": "app-server" },
+            "target": { "cell": "payment-gw" },
+            "labels": ["HTTPS: Tokenized payment"],
+            "attrs": { "line": { "stroke": "red" } },
+            "data": {
+              "type": "tm.Flow",
+              "name": "HTTPS: Tokenized payment",
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "title": "Payment tampering",
+                  "status": "Open",
+                  "severity": "High",
+                  "type": "Tampering",
+                  "description": "Modify transaction details in transit",
+                  "mitigation": "Request signing, idempotency keys, audit logs",
+                  "modelType": "STRIDE",
+                  "number": 11
+                }
+              ]
+            }
+          },
+          {
+            "shape": "flow",
+            "source": { "cell": "app-server" },
+            "target": { "cell": "shipping-api" },
+            "labels": ["HTTPS API: Shipping request"],
+            "data": { "type": "tm.Flow", "name": "HTTPS API: Shipping request" }
+          }
+        ]
+      }
+    ],
+    "diagramTop": 1,
+    "reviewer": "",
+    "threatTop": 12
+  }
+}
